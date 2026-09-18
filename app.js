@@ -1,5 +1,7 @@
 import Fastify from "fastify";
 
+import { PORT, NODE_ENV } from "./config/env.js";
+
 const fastify = Fastify({
   logger: {
     transport: {
@@ -12,7 +14,7 @@ fastify.get("/", (req, res) => {
   res.send({ hello: "world" });
 });
 
-fastify.listen({ port: 3000 }, function (err, address) {
+fastify.listen({ port: PORT }, function (err, address) {
   if (err) {
     fastify.log.error(err);
     process.exit(1);
