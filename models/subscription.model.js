@@ -76,6 +76,7 @@ const subscriptionSchema = new mongoose.Schema(
 );
 
 // Auto-calulate renewal date if missing
+//* this is kinda like a middleware if you think about it
 subscriptionSchema.pre("save", function (next) {
   if (!this.renewalDate) {
     const renewalDate = new Date(this.startDate);
