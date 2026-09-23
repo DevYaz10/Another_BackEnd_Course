@@ -90,9 +90,10 @@ subscriptionSchema.pre("save", function (next) {
   }
 
   // Auto-update status if renewal date has passed
-  if (this.renewalDate < new Date()) {
-    this.status = "expired";
-  }
+  if (this.status === "active" && this.renewalDate < new Date()) {
+  this.status = "expired";
+}
+
 });
 
 const Subscription = mongoose.model("Subscription", subscriptionSchema);
