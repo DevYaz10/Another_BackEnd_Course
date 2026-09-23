@@ -14,7 +14,20 @@ export default async function userRoutes(fastify) {
   // every route in this plugin now requires a valid token
   fastify.addHook("onRequest", fastify.authenticate);
 
-  fastify.get("/", getUsers);
+  fastify.get(
+    "/",
+    {
+      config: {
+        rateLimit: {
+          max: 30,
+          timeWindow: "1 minute",
+          hook: "preHandler",
+          keyGenerator: (request) => request.user.userId,
+        },
+      },
+    },
+    getUsers,
+  );
   fastify.get("/:id", { schema: idParam }, getUser);
 
   // POST / PUT / DELETE stay as stubs until the course gets there —

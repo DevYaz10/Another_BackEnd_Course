@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import formbody from "@fastify/formbody";
 import jwt from "@fastify/jwt";
+import rateLimit from "@fastify/rate-limit";
 
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
@@ -40,6 +41,17 @@ fastify.decorate("authenticate", async (request, reply) => {
     request.log.warn({ code: err.code, msg: err.message }, "jwt verify failed");
     reply.code(401).send({ success: false, error: "Unauthorized", code: err.code });
   }
+});
+
+await fastify.register(rateLimit, {
+  global: true,
+  max: 100,
+  timeWindow: "1 minute",
+  errorResponseBuilder: (request, context) => ({
+    statusCode: 429,
+    success: false,
+    error: `Too many requests, retry in ${context.after}`,
+  }),
 });
 
 
