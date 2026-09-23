@@ -1,4 +1,6 @@
 import Subscription from "../models/subscription.model.js";
+import { workflowClient } from "../config/upstash.js";
+import { APP_URL } from "../config/env.js";
 
 const httpError = (statusCode, message) =>
   Object.assign(new Error(message), { statusCode });
@@ -45,6 +47,13 @@ export const createSubscription = async (request, reply) => {
     category, paymentMethod, startDate, renewalDate,
     user: request.user.userId,
   });
+
+  
+  await workflowClient.trigger({
+    url: `${APP_URL}/api/v1/workflow/subscription/reminder`,
+    body: { subscriptionId: subscription._id },
+  });
+
 
   return reply.code(201).send({ success: true, data: subscription });
 };
