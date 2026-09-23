@@ -11,7 +11,7 @@ const cookieOptions = () => ({
 const httpError = (statusCode, message) =>
   Object.assign(new Error(message), { statusCode });
 
-//? here we did not apply "Atomic Operation" because in mongoose it already makes a whole 1 document unlike relational DB 
+//? here we did not apply "Atomic Operation" because in mongoose it already makes a whole 1 document unlike relational DB
 //? therefore there is no use for the second Check for the transaction
 //* we might need it when making subscritipons but not for a simple account signup
 export const signUp = async (request, reply) => {
@@ -22,7 +22,7 @@ export const signUp = async (request, reply) => {
 
   const user = await User.create({ name, email, password });
 
-  const token = await reply.jwtSign({ userId: user._id });
+  const token = await reply.jwtSign({ userId: user._id, role: user.role });
   return reply.setCookie("token", token, cookieOptions()).code(201).send({
     success: true,
     data: user,
@@ -36,9 +36,9 @@ export const signIn = async (request, reply) => {
   if (!user) throw httpError(401, "Invalid email or password");
 
   const matches = await user.comparePassword(password);
-  if (!matches) throw httpError(401, "Invalid email or password"); 
+  if (!matches) throw httpError(401, "Invalid email or password");
 
-  const token = await reply.jwtSign({ userId: user._id });
+  const token = await reply.jwtSign({ userId: user._id, role: user.role });
   return reply.setCookie("token", token, cookieOptions()).send({
     success: true,
     data: user,

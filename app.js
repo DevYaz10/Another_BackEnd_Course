@@ -36,10 +36,12 @@ await fastify.register(jwt, {
 fastify.decorate("authenticate", async (request, reply) => {
   try {
     await request.jwtVerify();
-  } catch {
-    reply.code(401).send({ success: false, error: "Unauthorized" });
+  } catch (err) {
+    request.log.warn({ code: err.code, msg: err.message }, "jwt verify failed");
+    reply.code(401).send({ success: false, error: "Unauthorized", code: err.code });
   }
 });
+
 
 // Routes
 await fastify.register(authRoutes, { prefix: "/api/v1/auth" });

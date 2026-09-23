@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs"; 
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -22,7 +22,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minLength: [8, "Password must be at least 8 characters long"],
-      select: false
+      select: false,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
   },
   {
@@ -40,9 +45,11 @@ userSchema.methods.comparePassword = function (candidate) {
 };
 
 userSchema.set("toJSON", {
-  transform: (_doc, ret) => { delete ret.password; return ret; },
+  transform: (_doc, ret) => {
+    delete ret.password;
+    return ret;
+  },
 });
-
 
 const User = mongoose.model("User", userSchema);
 export default User;
