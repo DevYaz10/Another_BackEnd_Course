@@ -1,11 +1,12 @@
 import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import formbody from "@fastify/formbody";
+import jwt from "@fastify/jwt";
 
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
-import { PORT, NODE_ENV } from "./config/env.js";
+import { PORT, NODE_ENV, JWT_SECRET, JWT_EXPIRES_IN } from "./config/env.js";
 import connectToDatabase from "./database/mongodb.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 
@@ -24,6 +25,21 @@ fastify.setNotFoundHandler(notFoundHandler);
 
 await fastify.register(formbody);
 await fastify.register(cookie);
+
+// Authentication by token
+await fastify.register(jwt, {
+  secret: JWT_SECRET,
+  sign: { expiresIn: JWT_EXPIRES_IN || "1d" },
+  cookie: { cookieName: "token", signed: false },
+});
+
+fastify.decorate("authenticate", async (request, reply) => {
+  try {
+    await request.jwtVerify();
+  } catch {
+    reply.code(401).send({ success: false, error: "Unauthorized" });
+  }
+});
 
 // Routes
 await fastify.register(authRoutes, { prefix: "/api/v1/auth" });
